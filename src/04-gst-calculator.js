@@ -39,5 +39,36 @@
  *   // => { baseAmount: 500, gstRate: 0, gstAmount: 0, totalAmount: 500 }
  */
 export function calculateGST(amount, category) {
-  // Your code here
+  if (!Number.isFinite(amount) || amount <= 0 || typeof category !== "string") return null;
+
+  let gstRateByCategory = 0;
+
+  const normalizeCategory = category.toLowerCase();
+
+  // we can replace the switch-case with object mapping for easy expansion and maintain
+  switch (normalizeCategory) {
+    case "essential":
+      gstRateByCategory = 0;
+      break;
+    case "food":
+      gstRateByCategory = 5;
+      break;
+    case "standard":
+      gstRateByCategory = 12;
+      break;
+    case "electronics":
+      gstRateByCategory = 18;
+      break;
+    case "luxury":
+      gstRateByCategory = 28;
+      break;
+    default:
+      return null;
+  }
+
+  // we can also use Number() instead of parseFloat() 
+  const gstAmount = parseFloat(((amount * gstRateByCategory) / 100).toFixed(2));
+  const totalAmount = parseFloat((amount + gstAmount).toFixed(2));
+
+  return { baseAmount: amount, gstRate: gstRateByCategory, gstAmount, totalAmount }
 }

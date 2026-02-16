@@ -41,8 +41,7 @@ export function fixBollywoodTitle(title) {
     const normalize = e.toLowerCase();
 
     if (smallWord.includes(normalize) && index !== 0) {
-      const lowerCase = normalize.charAt(0) + normalize.slice(1);
-      return lowerCase;
+      return normalize;
     } else {
       const Capitalize = normalize.charAt(0).toUpperCase() + normalize.slice(1)
       return Capitalize;

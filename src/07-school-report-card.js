@@ -32,14 +32,70 @@
  *
  * @example
  *   generateReportCard({ name: "Rahul", marks: { maths: 85, science: 92, english: 78 } })
- *   // => { name: "Rahul", totalMarks: 255, percentage: 85, grade: "A",
- *   //      highestSubject: "science", lowestSubject: "english",
- *   //      passedSubjects: ["maths", "science", "english"], failedSubjects: [],
- *   //      subjectCount: 3 }
+ *    => { name: "Rahul", totalMarks: 255, percentage: 85, grade: "A",
+ *         highestSubject: "science", lowestSubject: "english",
+ *         passedSubjects: ["maths", "science", "english"], failedSubjects: [],
+ *         subjectCount: 3 }
  *
  *   generateReportCard({ name: "Priya", marks: { maths: 35, science: 28 } })
- *   // => { name: "Priya", totalMarks: 63, percentage: 31.5, grade: "F", ... }
+ *    => { name: "Priya", totalMarks: 63, percentage: 31.5, grade: "F", ... }
  */
 export function generateReportCard(student) {
-  // Your code here
+  if (typeof student !== "object" || student === null || Array.isArray(student)) return null;
+
+  // const { name, marks } = student;
+
+  if (typeof student.name !== "string" || student.name === "") return null;
+  if (typeof student.marks !== "object" || Object.keys(student.marks).length === 0) return null;
+
+  for (const subject in student.marks) {
+    const mark = student.marks[subject];
+    if (typeof mark !== "number" || mark < 0 || mark > 100) return null;
+  }
+
+  const numSubjects = Object.keys(student.marks).length;
+  const totalMarks = Object.values(student.marks)
+    // .map((mark) => Number(mark))
+    .reduce((acc, c) => acc + c, 0);
+  const percentage = Number(((totalMarks / (numSubjects * 100)) * 100).toFixed(2));
+
+  let grade;
+
+  if (percentage >= 90) grade = "A+"
+  else if (percentage >= 80 && percentage < 90) grade = "A"
+  else if (percentage >= 70 && percentage < 80) grade = "B"
+  else if (percentage >= 60 && percentage < 70) grade = "C"
+  else if (percentage >= 40 && percentage < 60) grade = "D"
+  else if (percentage < 40) grade = "F";
+
+  const highest = Object.entries(student.marks).reduce((acc, [subject, mark]) => {
+    if (mark > acc.maxVal) return { subject, maxVal: mark };
+    return acc;
+  }, { subject: null, maxVal: -Infinity });
+
+  const lowest = Object.entries(student.marks).reduce((acc, [subject, mark]) => {
+    if (mark < acc.minVal) return { subject, minVal: mark };
+    return acc;
+  }, { subject: null, minVal: Infinity });
+
+  const passedSubjects = Object.entries(student.marks).filter(([_, marks]) => {
+    return marks >= 40
+  }).map(([subject]) => subject);
+
+  const failedSubjects = Object.entries(student.marks).filter(([_, marks]) => {
+    return marks < 40
+  }).map(([subject]) => subject);
+
+  // let passedSubjects = [];
+  // let failedSubjects = [];
+  // for (const sub in student.marks) {
+  //   const mark = student.marks[sub];
+  //   if (mark >= 40) {
+  //     passedSubjects.push(sub);
+  //   } else {
+  //     failedSubjects.push(sub);
+  //   }
+  // }
+
+  return { name: student.name, totalMarks, percentage, grade, highestSubject: highest.subject, lowestSubject: lowest.subject, subjectCount: numSubjects, passedSubjects, failedSubjects };
 }

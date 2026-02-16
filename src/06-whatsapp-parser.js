@@ -39,5 +39,33 @@
  *   //      text: "I love this song", wordCount: 4, sentiment: "love" }
  */
 export function parseWhatsAppMessage(message) {
-  // Your code here
+  if (typeof message !== "string") return null;
+  if (!message.includes(" - ") || !message.includes(": ")) return null;
+
+  const date = message.split(", ").at(0);
+  const time = message.split(", ").at(1).split(" - ").at(0);
+  const sender = message.split(" - ").at(1).split(": ").at(0);
+  const text = message.split(": ").at(1);
+
+  const wordCount = text.trim().split(" ").length;
+
+  const sentiFunny = /[\😂:]/g;
+  const sentiLove = /[\❤]/;
+
+  let sentiment = "neutral";
+
+  if ((sentiFunny).test(text) || text.toLowerCase().includes("haha")) {
+    sentiment = "funny"
+  }
+  else if (sentiLove.test(text) || text.includes("love") || text.includes("pyaar")) {
+    sentiment = "love";
+  }
+  //  else {
+  //   sentiment = "neutral";
+  // }
+
+  return { date, time, sender, text, wordCount, sentiment };
 }
+
+// const msg = "25/01/2025, 14:30 - Rahul: Bhai party kab hai? 😂";
+// console.log(parseWhatsAppMessage(msg))

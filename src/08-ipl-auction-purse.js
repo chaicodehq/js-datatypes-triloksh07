@@ -44,5 +44,65 @@
  *   // => { ..., remaining: -1200, isOverBudget: true }
  */
 export function iplAuctionSummary(team, players) {
-  // Your code here
+  // if (typeof team !== "object" || typeof team.purse !== "number") return null;
+  if (team === null || typeof team !== "object" || !team.purse || Number.isNaN(team.purse) || team.purse <= 0) return null;
+  if (!Array.isArray(players) || players.length <= 0) return null;
+
+  // Basic Calculations
+  const teamName = team.name;
+  const totalSpent = players.reduce((acc, { price }) => (acc + price), 0);
+  const remaining = team.purse - totalSpent;
+  const playerCount = players.length;
+  const averagePrice = Math.round(totalSpent / playerCount);
+
+  // Player stats
+  const costliestPlayer = players.reduce((acc, { name, role, price }) => {
+    if (price > acc.price) return { name, role, price };
+    return acc;
+  }, { name: null, role: null, price: -Infinity });
+
+  const cheapestPlayer = players.reduce((acc, { name, role, price }) => {
+    if (price < acc.price) return { name, role, price };
+    return acc;
+  }, { name: null, role: null, price: Infinity });
+
+  // let bat = 0;
+  // let bowl = 0;
+  // let wk = 0;
+  // let ar = 0;
+
+  // Role grouping
+  const byRole = players.reduce((acc, { role }) => {
+    if (role === "bat") {
+      if (!Object.hasOwn(acc, "bat")) (acc.bat = 1)
+      else {
+        acc.bat++;
+      };
+    }
+    if (role === "bowl") {
+      if (!Object.hasOwn(acc, "bowl")) (acc.bowl = 1)
+      else {
+        acc.bowl++;
+      };
+    }
+    if (role === "wk") {
+      if (!Object.hasOwn(acc, "wk")) (acc.wk = 1)
+      else {
+        acc.wk++;
+      };
+    }
+    if (role === "ar") {
+      if (!Object.hasOwn(acc, "ar")) (acc.ar = 1)
+      else {
+        acc.ar++;
+      };
+    }
+    return acc;
+  }, {});
+
+
+  // Budget Check
+  const isOverBudget = totalSpent > team.purse ? true : false;
+
+  return { teamName, totalSpent, remaining, playerCount, costliestPlayer, cheapestPlayer, averagePrice, byRole, isOverBudget };
 }

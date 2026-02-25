@@ -47,5 +47,84 @@
  *   //      frequentContact: "Swiggy", allAbove100: false, hasLargeTransaction: true }
  */
 export function analyzeUPITransactions(transactions) {
-  // Your code here
+  if (!Array.isArray(transactions) || transactions.length === 0) return null;
+
+  // for (let i = 0; i < transactions.length; i++) {
+  //   if (transactions[i].amount < 0) return null;
+  // }
+
+  const filteredTransaction = transactions.filter(t => (t.amount > 0 && (t.type === "credit" || t.type === "debit")));
+  if (filteredTransaction.length === 0) return null;
+
+  // console.log(filteredTransaction);
+
+  const totalCredit = filteredTransaction.filter(t => t.type === "credit").reduce((acc, { amount }) => (acc + amount), 0);
+  const totalDebit = filteredTransaction.filter(t => t.type === "debit").reduce((acc, { amount }) => (acc + amount), 0);
+  const netBalance = Number(totalCredit - totalDebit);
+  const transactionCount = filteredTransaction.length;
+  const avgTransaction = Math.round((totalCredit + totalDebit) / transactionCount);
+  const highestTransaction = filteredTransaction.reduce((acc, t) => {
+    // console.log(acc, t);
+    if (t.amount > acc.amount) return { ...t }
+    return acc;
+  }, { amount: -Infinity });
+
+  const categoryBreakdown = filteredTransaction.reduce((acc, { category, amount }) => {
+    if (category in acc) {
+      acc[category] += amount;
+    } else {
+      acc[category] = (acc[category] || 0) + amount;
+      // Object.defineProperty(acc, category, {
+      //   value: amount,
+      //   configurable: true,
+      //   enumerable: true,
+      //   writable: true,
+      // })
+    }
+    return acc;
+  }, {});
+
+  const freqContact = filteredTransaction.reduce((acc, { to }) => {
+    if (to in acc) {
+      acc[to] += 1;
+    } else {
+      acc[to] = (acc[to] || 0) + 1;
+      // Object.defineProperty(acc, to, {
+      //   value: 1,
+      //   configurable: true,
+      //   enumerable: true,
+      //   writable: true,
+      // })
+    }
+    return acc;
+  }, {});
+
+  const frequentContact = Object.entries(freqContact).reduce((best, [k, v]) => {
+    return v > best[1] ? [k, v] : best;
+  }, ["", 0])[0];
+
+  // let frequentContact = "";
+  // let prevVal = 0;
+  // for (const [k, v] of Object.entries(freqContact)) {
+  //   console.log(k, v);
+  //   if (v > prevVal) {
+  //     frequentContact = k;
+  //     prevVal = v;
+  //   }
+  // }
+
+  const allAbove100 = filteredTransaction.every(t => t.amount > 100);
+  const hasLargeTransaction = filteredTransaction.some(t => t.amount >= 5000);
+
+  return { totalCredit, totalDebit, netBalance, transactionCount, avgTransaction, highestTransaction, categoryBreakdown, frequentContact, allAbove100, hasLargeTransaction };
 }
+
+const sampleTransactions = [
+  { id: "T1", type: "credit", amount: 5000, to: "Salary", category: "income", date: "2025-01-01" },
+  { id: "T2", type: "debit", amount: 200, to: "Swiggy", category: "food", date: "2025-01-02" },
+  { id: "T3", type: "debit", amount: 2000, to: "Swiggy", category: "food", date: "2025-01-03" },
+  { id: "T4", type: "debit", amount: 1500, to: "Rent", category: "housing", date: "2025-01-05" },
+  { id: "T5", type: "credit", amount: 30000, to: "Rahul", category: "refund", date: "2025-01-06" }
+];
+
+console.log(analyzeUPITransactions(sampleTransactions))
